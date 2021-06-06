@@ -86,14 +86,6 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
         clearTimeout(this.singleClickTimeout);
       }
 
-      if (evt.nativeEvent.changedTouches.length > 1) {
-        const centerX = (evt.nativeEvent.changedTouches[0].pageX + evt.nativeEvent.changedTouches[1].pageX) / 2;
-        this.centerDiffX = centerX - this.props.cropWidth / 2;
-
-        const centerY = (evt.nativeEvent.changedTouches[0].pageY + evt.nativeEvent.changedTouches[1].pageY) / 2;
-        this.centerDiffY = centerY - this.props.cropHeight / 2;
-      }
-
       // 计算长按
       if (this.longPressTimeout) {
         clearTimeout(this.longPressTimeout);
@@ -106,20 +98,20 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
         }
       }, this.props.longPressTime);
 
-      if (evt.nativeEvent.changedTouches.length <= 1) {
+      if (evt.nativeEvent.touches.length <= 1) {
         // 一个手指的情况
         if (new Date().getTime() - this.lastClickTime < (this.props.doubleClickInterval || 0)) {
           // 认为触发了双击
           this.lastClickTime = 0;
 
           // 因为可能触发放大，因此记录双击时的坐标位置
-          this.doubleClickX = evt.nativeEvent.changedTouches[0].pageX;
-          this.doubleClickY = evt.nativeEvent.changedTouches[0].pageY;
+          this.doubleClickX = evt.nativeEvent.touches[0].pageX;
+          this.doubleClickY = evt.nativeEvent.touches[0].pageY;
 
           if (this.props.onDoubleClick) {
             this.props.onDoubleClick({
-              locationX: evt.nativeEvent.changedTouches[0].locationX,
-              locationY: evt.nativeEvent.changedTouches[0].locationY,
+              locationX: evt.nativeEvent.touches[0].locationX,
+              locationY: evt.nativeEvent.touches[0].locationY,
               pageX: this.doubleClickX,
               pageY: this.doubleClickY,
             });
@@ -186,8 +178,19 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
         // 有时双击会被当做位移，这里屏蔽掉
         return;
       }
+      if(evt.nativeEvent.touches.length > 2){
+        return;
+      }
 
-      if (evt.nativeEvent.changedTouches.length <= 1) {
+      if (evt.nativeEvent.touches.length > 1) {
+        const centerX = (evt.nativeEvent.touches[0].pageX + evt.nativeEvent.touches[1].pageX) / 2;
+        this.centerDiffX = centerX - this.props.cropWidth / 2;
+
+        const centerY = (evt.nativeEvent.touches[0].pageY + evt.nativeEvent.touches[1].pageY) / 2;
+        this.centerDiffY = centerY - this.props.cropHeight / 2;
+      }
+
+      if (evt.nativeEvent.touches.length === 1) {
         // x 位移
         let diffX = gestureState.dx - (this.lastPositionX || 0);
         if (this.lastPositionX === null) {
@@ -349,7 +352,7 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
             }
           }
         }
-      } else {
+      } else if(evt.nativeEvent.touches.length > 1 && evt.nativeEvent.touches.length > 1) {
         // 多个手指的情况
         // 取消长按状态
         if (this.longPressTimeout) {
@@ -360,27 +363,27 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
           // 找最小的 x 和最大的 x
           let minX: number;
           let maxX: number;
-          if (evt.nativeEvent.changedTouches[0].locationX > evt.nativeEvent.changedTouches[1].locationX) {
-            minX = evt.nativeEvent.changedTouches[1].pageX;
-            maxX = evt.nativeEvent.changedTouches[0].pageX;
+          if (evt.nativeEvent.touches[0].locationX > evt.nativeEvent.touches[1].locationX) {
+            minX = evt.nativeEvent.touches[1].pageX;
+            maxX = evt.nativeEvent.touches[0].pageX;
           } else {
-            minX = evt.nativeEvent.changedTouches[0].pageX;
-            maxX = evt.nativeEvent.changedTouches[1].pageX;
+            minX = evt.nativeEvent.touches[0].pageX;
+            maxX = evt.nativeEvent.touches[1].pageX;
           }
 
           let minY: number;
           let maxY: number;
-          if (evt.nativeEvent.changedTouches[0].locationY > evt.nativeEvent.changedTouches[1].locationY) {
-            minY = evt.nativeEvent.changedTouches[1].pageY;
-            maxY = evt.nativeEvent.changedTouches[0].pageY;
+          if (evt.nativeEvent.touches[0].locationY > evt.nativeEvent.touches[1].locationY) {
+            minY = evt.nativeEvent.touches[1].pageY;
+            maxY = evt.nativeEvent.touches[0].pageY;
           } else {
-            minY = evt.nativeEvent.changedTouches[0].pageY;
-            maxY = evt.nativeEvent.changedTouches[1].pageY;
+            minY = evt.nativeEvent.touches[0].pageY;
+            maxY = evt.nativeEvent.touches[1].pageY;
           }
 
           const widthDistance = maxX - minX;
           const heightDistance = maxY - minY;
-          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance);
+          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance) * 2;
           this.zoomCurrentDistance = Number(diagonalDistance.toFixed(1));
 
           if (this.zoomLastDistance !== null) {
@@ -438,7 +441,7 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
       const moveDistance = Math.sqrt(gestureState.dx * gestureState.dx + gestureState.dy * gestureState.dy);
       const { locationX, locationY, pageX, pageY } = evt.nativeEvent;
 
-      if (evt.nativeEvent.changedTouches.length === 1 && moveDistance < (this.props.clickDistance || 0)) {
+      if (evt.nativeEvent.touches.length === 1 && moveDistance < (this.props.clickDistance || 0)) {
         this.singleClickTimeout = setTimeout(() => {
           if (this.props.onClick) {
             this.props.onClick({ locationX, locationY, pageX, pageY });
