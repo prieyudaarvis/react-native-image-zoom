@@ -137,8 +137,8 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
               // 此时 this.scale 一定为 1
               const beforeScale = this.scale;
 
-              // 开始缩放
-              this.scale = this.defaultScale * 2;
+              // 开始缩放. How zoom when double tap
+              this.scale = this.defaultScale * 2.5;
 
               // 缩放 diff
               const diffScale = this.scale - beforeScale;
@@ -382,14 +382,14 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
             maxY = evt.nativeEvent.touches[1].pageY;
           }
 
-          //ydhnwb
+          //How aggresive double pinch is
           const widthDistance = maxX - minX;
           const heightDistance = maxY - minY;
-          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance) * 1.2;
+          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance) * 1.05;
           this.zoomCurrentDistance = Number(diagonalDistance.toFixed(1));
 
           if (this.zoomLastDistance !== null) {
-            const distanceDiff = (this.zoomCurrentDistance - this.zoomLastDistance) / 200;
+            const distanceDiff = (this.zoomCurrentDistance - this.zoomLastDistance) / 400;
             let zoom = this.scale + distanceDiff;
 
             if (zoom < (this.props.minScale || 0)) {
