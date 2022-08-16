@@ -137,8 +137,8 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
               // 此时 this.scale 一定为 1
               const beforeScale = this.scale;
 
-              // 开始缩放 ydhnwb
-              this.scale = this.defaultScale * 1.2;
+              // 开始缩放
+              this.scale = this.defaultScale * 2;
 
               // 缩放 diff
               const diffScale = this.scale - beforeScale;
@@ -382,9 +382,10 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
             maxY = evt.nativeEvent.touches[1].pageY;
           }
 
+          //ydhnwb
           const widthDistance = maxX - minX;
           const heightDistance = maxY - minY;
-          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance) * 2;
+          const diagonalDistance = Math.sqrt(widthDistance * widthDistance + heightDistance * heightDistance) * 1.2;
           this.zoomCurrentDistance = Number(diagonalDistance.toFixed(1));
 
           if (this.zoomLastDistance !== null) {
