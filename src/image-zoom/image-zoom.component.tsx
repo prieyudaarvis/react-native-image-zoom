@@ -137,8 +137,8 @@ export default class ImageViewer extends React.Component<ImageZoomProps, ImageZo
               // 此时 this.scale 一定为 1
               const beforeScale = this.scale;
 
-              // 开始缩放
-              this.scale = this.defaultScale * 2;
+              // 开始缩放 ydhnwb
+              this.scale = this.defaultScale * 1.2;
 
               // 缩放 diff
               const diffScale = this.scale - beforeScale;
